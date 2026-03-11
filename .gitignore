@@ -44,3 +44,21 @@
 .vs/
 *.sln
 *.vcxproj.user
+
+# Build folders
+Debug/
+Release/
+x64/
+x86/
+
+# Build files
+*.log
+*.tlog
+*.idb
+*.ilk
+*.pdb
+*.recipe
+
+# Windows
+.DS_Store
+Thumbs.db
