@@ -49,16 +49,25 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
 
+	float centerX = 0;
+	float centerY = 0;
+	float size = 0.1;
 	float triangle[] =
 	{
-		0,0,0,	//v0
-		1,0,0,  //v1
-		1,1,0   //v2
+		centerX - size / 2,centerY - size / 2,0 ,	//v0
+		centerX + size / 2,centerY - size / 2,0,  //v1
+		centerX + size / 2,centerY + size / 2,0,  //v2
+
+		centerX - size / 2,centerY - size / 2,0 ,	//v0
+		centerX + size / 2,centerY + size / 2,0,  //v1
+		centerX - size / 2,centerY + size / 2,0   //v2
 	};
 	glGenBuffers(1, &m_TriangleVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 	// glBufferData - 동기함수 (데이터를 올려야 하기때문) 그리는건 비동기 - GPU가 알아서 그려줌
+
+	
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -195,10 +204,16 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+float gTime = 0;
+
 void Renderer::DrawTriangle()
 {
+	gTime += 0.0001f;
 	//Program select
 	glUseProgram(m_TriangleShader);
+
+	int uTime = glGetUniformLocation(m_TriangleShader, "u_Time");
+	glUniform1f(uTime, gTime);
 
 	int attribPosition = glGetAttribLocation(m_TriangleShader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
