@@ -6,6 +6,7 @@ in vec3 a_Position;
 in float a_Mass;
 in vec2 a_Vel;
 in float a_RV;
+in float a_RV1;
 
 const float C_PI = 3.141592;
 const vec2 C_G = vec2(0,-9.8);
@@ -68,7 +69,73 @@ void Particle(){
     gl_Position = newPos;
     gl_PointSize = 5.0;
 }
+
+float pseudoRandom(float n) {
+	return fract(sin(n) * 43758.5453);
+}
+
+void Particle2(){
+	// emitTime
+	float newTime = u_Time - a_RV1;
+
+	if(newTime > 0.0){
+		float t = mod(newTime, 1.0);
+		float tt = t * t;
+
+		float vx = a_Vel.x/10;
+		float vy = a_Vel.y/10;
+
+		float initPosX = a_Position.x;
+		float initPosY = a_Position.y;
+
+		vec4 newPos = vec4(0.0);
+		newPos.x = initPosX + vx * t + 0.5 * C_G.x * tt;
+		newPos.y = initPosY + vy * t + 0.5 * C_G.y * tt;
+		newPos.z = 0.0;
+		newPos.w = 1.0;
+
+		gl_Position = newPos;
+		gl_PointSize = 5.0;
+	}
+	else{
+		gl_Position = vec4(-10.0, -10.0, 0.0, 1.0);
+		gl_PointSize = 0.0;
+	}
+    gl_PointSize = 5.0;
+}
+
+void Particle3(){
+	// emitTime
+	float life = 2.5;
+    float newTime = u_Time + a_RV1*life;
+
+if(newTime > 0.0){
+		//float scale = a_RV;
+		float t = mod(newTime, 2.5);
+		float tt = t * t;
+
+		float initPosX = a_Position.x + sin(a_RV * 2.0 * C_PI);
+		float initPosY = a_Position.y + cos(a_RV * 2.0 * C_PI);
+
+		float vx = a_Vel.x/10;
+		float vy = a_Vel.y/10;
+
+		vec4 newPos = vec4(0.0);
+		newPos.x = initPosX + vx * t;
+		newPos.y = initPosY + vy * t + 0.5 * C_G.y * 0.08 * tt;
+		newPos.z = 0.0;
+		newPos.w = 1.0;
+
+		gl_Position = newPos;
+		gl_PointSize = 2.0;
+	}
+	else{
+		gl_Position = vec4(-10.0, -10.0, 0.0, 1.0);
+		gl_PointSize = 0.0;
+	}
+}
+
 void main()
 {
-	Particle();
+	Particle3();
 }

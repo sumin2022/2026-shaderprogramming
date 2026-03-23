@@ -44,27 +44,38 @@ void Renderer::GenParticles(int Num) {
 	VertexCount = Num;
 
 	std::vector<float> particles;
-	particles.reserve(Num * 7);
+	particles.reserve(Num * 8);
 
-	float minRadius = 0.7f;
-	float maxRadius = 0.9f;
+	//float minRadius = 0.7f;
+	//float maxRadius = 0.9f;
 	float centerX = 0.0f;
 	float centerY = 0.0f;
 
 	for (int i = 0; i < Num; ++i) {
 		float rv = static_cast<float>(rand()) / RAND_MAX;
-		float angle = rv * 2.0f * 3.14159265f;
+		float rv1 = static_cast<float>(rand()) / RAND_MAX;
+		//float angle = rv * 2.0f * 3.14159265f;
 
-		float r = minRadius + (static_cast<float>(rand()) / RAND_MAX) * (maxRadius - minRadius);
+		//float r = minRadius + (static_cast<float>(rand()) / RAND_MAX) * (maxRadius - minRadius);
 
-		float x = centerX + r * cos(angle);
-		float y = centerY + r * sin(angle);
+		float x = centerX; // +r * cos(angle);
+		float y = centerY; // +r * sin(angle);
 		float z = 0.0f;
 
 		float mass = 0.7f + (static_cast<float>(rand()) / RAND_MAX) * 0.6f;
 
-		float vx = -0.08f + (static_cast<float>(rand()) / RAND_MAX) * 0.16f;
-		float vy = -0.05f + (static_cast<float>(rand()) / RAND_MAX) * 0.10f;
+		//// 퍼져나가는 방향 벡터
+		//float dirX = cos(angle);
+		//float dirY = sin(angle);
+
+		//// 바깥쪽 퍼짐 세기
+		//float spread = 0.25f + (static_cast<float>(rand()) / RAND_MAX) * 0.25f;
+
+		//// 위로 솟구치는 힘
+		//float up = 1.2f + (static_cast<float>(rand()) / RAND_MAX) * 0.6f;
+
+		float vx = 0.0f; // dirX* spread;
+		float vy = 0.0f; // up + dirY * 0.25f;
 
 		particles.push_back(x);
 		particles.push_back(y);
@@ -73,6 +84,7 @@ void Renderer::GenParticles(int Num) {
 		particles.push_back(vx);
 		particles.push_back(vy);
 		particles.push_back(rv);
+		particles.push_back(rv1);
 	}
 	if (m_ParticleVBO == 0) {
 		glGenBuffers(1, &m_ParticleVBO);
@@ -121,7 +133,7 @@ void Renderer::CreateVertexBufferObjects()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 	// glBufferData - 동기함수 (데이터를 올려야 하기때문) 그리는건 비동기 - GPU가 알아서 그려줌
 
-	GenParticles(1000);
+	GenParticles(5000);
 	
 }
 
@@ -301,19 +313,22 @@ void Renderer::DrawParticles()
 	int attribMass = glGetAttribLocation(m_TriangleShader, "a_Mass");
 	int attribVel = glGetAttribLocation(m_TriangleShader, "a_Vel");
 	int attribRV = glGetAttribLocation(m_TriangleShader, "a_RV");
+	int arributeRV1 = glGetAttribLocation(m_TriangleShader, "a_RV1");
 
 	glEnableVertexAttribArray(attribPosition);
 	glEnableVertexAttribArray(attribMass);
 	glEnableVertexAttribArray(attribVel);
 	glEnableVertexAttribArray(attribRV);
+	glEnableVertexAttribArray(arributeRV1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_ParticleVBO);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, 0);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
 
-	glVertexAttribPointer(attribMass, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (GLvoid*)(sizeof(float) * 3));
+	glVertexAttribPointer(attribMass, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 3));
 
-	glVertexAttribPointer(attribVel, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (GLvoid*)(sizeof(float) * 4));
-	glVertexAttribPointer(attribRV, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(attribVel, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 4));
+	glVertexAttribPointer(attribRV, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 6));
+	glVertexAttribPointer(arributeRV1, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 7));
 
 	glDrawArrays(GL_POINTS, 0, VertexCount);
 
