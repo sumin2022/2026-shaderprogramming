@@ -7,6 +7,10 @@ in float a_Mass;
 in vec2 a_Vel;
 in float a_RV;
 in float a_RV1;
+in float a_RV2;
+
+//out float v_Grey;
+out vec3 v_Color;
 
 const float C_PI = 3.141592;
 const vec2 C_G = vec2(0,-9.8);
@@ -79,7 +83,7 @@ void Particle2(){
 	float newTime = u_Time - a_RV1;
 
 	if(newTime > 0.0){
-		float t = mod(newTime, 1.0);
+		float t = mod(newTime, 1.0); //newtime을 1로 나눈 나머지
 		float tt = t * t;
 
 		float vx = a_Vel.x/10;
@@ -106,16 +110,17 @@ void Particle2(){
 
 void Particle3(){
 	// emitTime
-	float life = 2.5;
-    float newTime = u_Time + a_RV1*life;
+	float life = a_RV2+0.5;
+    //float newTime = u_Time + a_RV1*life;
+	float newTime = u_Time - a_RV1;
 
 if(newTime > 0.0){
 		//float scale = a_RV;
-		float t = mod(newTime, 2.5);
+		float t = mod(newTime, life);
 		float tt = t * t;
-
-		float initPosX = a_Position.x + sin(a_RV * 2.0 * C_PI);
-		float initPosY = a_Position.y + cos(a_RV * 2.0 * C_PI);
+		float scale = pseudoRandom(a_RV1)*(life-t)/life;
+		float initPosX = a_Position.x*scale + sin(a_RV * 2.0 * C_PI);
+		float initPosY = a_Position.y*scale + cos(a_RV * 2.0 * C_PI);
 
 		float vx = a_Vel.x/10;
 		float vy = a_Vel.y/10;
@@ -135,7 +140,48 @@ if(newTime > 0.0){
 	}
 }
 
+void Thrust(){
+	//float life = a_RV2+0.5; 
+	//float newTime = u_Time + a_RV1*life;
+	float newTime = u_Time - a_RV1;
+	if(newTime>0.0){
+		float t = mod(newTime,1.0); 
+		float ampscale = t*0.5;	//0.5-t*0.5; - 0.5 -> 0
+		float amp = 2*(a_RV-0.5)*ampscale;
+		float period = a_RV2;
+		float sizeScale = t*2; //2-t*2;  - 2 -> 0
+		vec4 newPosition = vec4(a_Position, 1.0);
+
+		newPosition.x = a_Position.x*sizeScale -1 + t*2; // -1~1
+		newPosition.y = a_Position.y*sizeScale + sin(t*2*C_PI*period)*amp;
+
+		newPosition.z = a_Position.z;
+		gl_Position = newPosition;
+		gl_PointSize = 5.0;
+		//v_Grey = 1.0 - t; //시간이 지날수록 어두워짐
+
+		vec3 red    = vec3(1.0, 0.1, 0.0);
+        vec3 orange = vec3(1.0, 0.45, 0.0);
+        vec3 yellow = vec3(1.0, 0.9, 0.1);
+
+        if(t < 0.5){
+            float k = t / 0.5;
+            v_Color = mix(red, orange, k);
+        }
+        else{
+            float k = (t - 0.5) / 0.5;
+            v_Color = mix(orange, yellow, k);
+        }
+
+	}else{
+		gl_Position = vec4(-10.0, -10.0, 0.0, 1.0);
+		gl_PointSize = 0.0;
+		//v_Grey = 0.0;
+		v_Color = vec3(0.0, 0.0, 0.0);
+	}
+}
+
 void main()
 {
-	Particle3();
+	Thrust();
 }
