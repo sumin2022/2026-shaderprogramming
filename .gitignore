@@ -62,3 +62,6 @@ x86/
 # Windows
 .DS_Store
 Thumbs.db
+
+*.vcxproj
+*.vcxproj.filters

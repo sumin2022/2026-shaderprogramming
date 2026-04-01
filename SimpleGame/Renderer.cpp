@@ -25,6 +25,9 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	//Load shaders
 	m_TriangleShader = CompileShaders("./Shaders/triangle.vs", "./Shaders/triangle.fs");
+
+	//Load shaders
+	m_FSShader = CompileShaders("./Shaders/shader.vs", "./Shaders/shader.fs");
 	
 	//Create VBOs
 	CreateVertexBufferObjects();
@@ -175,6 +178,24 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_TriangleVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 	// glBufferData - 동기함수 (데이터를 올려야 하기때문) 그리는건 비동기 - GPU가 알아서 그려줌
+
+	// x, y, z, tx, ty, 
+	float rectFS[] =
+	{
+		// 첫 번째 삼각형
+		-1.f, -1.f, 0.f,   0.f, 0.f,   // left bottom
+		 1.f, -1.f, 0.f,   1.f, 0.f,   // right bottom
+		 1.f,  1.f, 0.f,   1.f, 1.f,   // right top
+
+		 // 두 번째 삼각형
+		 -1.f, -1.f, 0.f,   0.f, 0.f,   // left bottom
+		  1.f,  1.f, 0.f,   1.f, 1.f,   // right top
+		 -1.f,  1.f, 0.f,   0.f, 1.f    // left top
+	};
+
+	glGenBuffers(1, &m_VBOFS);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rectFS), rectFS, GL_STATIC_DRAW);
 
 	GenParticles(1000);
 	
@@ -339,6 +360,28 @@ void Renderer::DrawTriangle()
 	glVertexAttribPointer(attribMass, 1, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (GLvoid*)(sizeof(float) * 3));
 
 	glVertexAttribPointer(attribVel, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (GLvoid*)(sizeof(float) * 4));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void Renderer::DrawFS()
+{
+	gTime += 0.001f;
+	//Program select
+	glUseProgram(m_FSShader);
+
+	int uTime = glGetUniformLocation(m_FSShader, "u_Time");
+	glUniform1f(uTime, gTime);
+
+	int attribPosition = glGetAttribLocation(m_FSShader, "a_Pos"); 
+	int attribTex = glGetAttribLocation(m_FSShader, "a_Tex");
+
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTex);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(attribTex, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
