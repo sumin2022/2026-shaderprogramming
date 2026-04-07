@@ -198,6 +198,20 @@ void Renderer::CreateVertexBufferObjects()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rectFS), rectFS, GL_STATIC_DRAW);
 
 	GenParticles(1000);
+
+	//fill raindrop info
+	int index = 0;
+	for (int i = 0; i < 500; ++i) {
+		float x = static_cast<float>(rand()) / RAND_MAX;
+		float y = static_cast<float>(rand()) / RAND_MAX;
+		float sTime = 5.f * static_cast<float>(rand()) / RAND_MAX;
+		float lTime = 0.5f * static_cast<float>(rand()) / RAND_MAX;
+		m_RainInfo[index] = x; index++;
+		m_RainInfo[index] = y; index++;
+		m_RainInfo[index] = sTime; index++;
+		m_RainInfo[index] = lTime; index++;
+
+	}
 	
 }
 
@@ -372,6 +386,9 @@ void Renderer::DrawFS()
 
 	int uTime = glGetUniformLocation(m_FSShader, "u_Time");
 	glUniform1f(uTime, gTime);
+
+	int u_Points = glGetUniformLocation(m_FSShader, "u_Points");
+	glUniform4fv(u_Points, 500, m_RainInfo); //vec4 ¿©¼­ 4f
 
 	int attribPosition = glGetAttribLocation(m_FSShader, "a_Pos"); 
 	int attribTex = glGetAttribLocation(m_FSShader, "a_Tex");
